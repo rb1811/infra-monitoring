@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # --- THE DATABASE (For Infisical) ---
+  infisical-db:
+    image: postgres:15-alpine
+    container_name: infisical-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${infisicalpassword}
+      - POSTGRES_DB=infisical
+    networks:
+      - infra-storage
+    volumes:
+      - ./infisical-db-data:/var/lib/postgresql/data
+
+  # --- THE CACHE (For Infisical) ---
+  infisical-redis:
+    image: redis:7-alpine
+    container_name: infisical-redis
+    networks:
+      - infra-storage
+
+  # --- INFISICAL (Your Azure Key Vault alternative) ---
+  infisical:
+    image: infisical/infisical:latest
+    container_name: infisical
+    depends_on:
+      - infisical-db
+      - infisical-redis
+    ports:
+      - "9081:8080" # Access the UI here to set your passwords
+    environment:
+      - NODE_ENV=production
+      - DB_CONNECTION_URL=postgresql://{${POSTGRES_USER}}:${infisicalpassword}@infisical-db:5432/infisical
+      - REDIS_URL=redis://infisical-redis:6379
+      - ENCRYPTION_KEY=${INFISICAL_ENCRYPTION_KEY} # Generate once with: openssl rand -hex 32
+      - AUTH_SECRET=${INFISICAL_AUTH_SECRET}     # Generate once with: openssl rand -hex 32
+      - SITE_URL=http://localhost:9081
+    networks:
+      - infra-storage
+
+  # --- MINIO (Shared Storage) ---
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    networks:
+      - infra-storage
+    ports:
+      - "9091:9091"
+      - "9090:9090"
+    command: server --address ":9091" --console-address ":9090" /data
+    # ... healthcheck and volumes as before ...
+
+networks:
+  infra-storage:
+    external: true
