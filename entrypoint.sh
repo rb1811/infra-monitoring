@@ -65,6 +65,7 @@ INFISICAL_ACCESS_TOKEN=$(infisical login --method=universal-auth \
 # Associative arrays act like Dictionaries to map environment keys to values
 declare -A FLORENCE_SECRETS=(
     ["S3_ENDPOINT_URL"]="http://${INFRA_BLOB_STORAGE_SERVICE_NAME}:9091"
+    ["S3_PUBLIC_URL"]="http://localhost:9091"
     ["S3_ACCESS_KEY"]="$MINIO_ROOT_USER"
     ["S3_SECRET_KEY"]="$MINIO_ROOT_PASSWORD"
     ["S3_BUCKET"]="florence-uploads"
