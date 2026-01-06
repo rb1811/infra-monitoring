@@ -2,21 +2,24 @@ version: '3.8'
 
 services:
   # --- THE DATABASE ---
-  infra-infisical-db:
-    build:
-      context: .
-      dockerfile_inline: |
-        FROM postgres:15-alpine
-    image: ${INFRA_SQL_DB_IMAGE_NAME}
-    container_name: ${INFRA_SQL_DB_CONTAINER_NAME}
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=infisical
-    networks:
-      - infra-storage
-    volumes:
-      - infra-db-data:/var/lib/postgresql/data
+  infra-postgres:
+      build:
+        context: .
+        dockerfile: Dockerfile_infra_postgres
+      image: ${INFRA_SQL_DB_IMAGE_NAME}
+      container_name: ${INFRA_SQL_DB_CONTAINER_NAME}
+      # OVERRIDE THE ENTRYPOINT
+      entrypoint: ["init-db-wrapper.sh"]
+      environment:
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - POSTGRES_DB=infisical
+        # JUST ADD NEW DB NAMES HERE IN THE FUTURE
+        - POSTGRES_MULTIPLE_DATABASES=florence_db
+      networks:
+        - infra-storage
+      volumes:
+        - infra-db-data:/var/lib/postgresql/data
 
 
   # --- THE CACHE ---
@@ -41,13 +44,13 @@ services:
       dockerfile_inline: |
         FROM infisical/infisical:latest
     depends_on:
-      - infra-infisical-db
+      - infra-postgres
       - infra-redis
     ports:
       - "${PORT_INFISICAL_UI}:8080"
     environment:
       - NODE_ENV=production
-      - DB_CONNECTION_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@infra-infisical-db:5432/infisical
+      - DB_CONNECTION_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${INFRA_SQL_SERVICE_NAME}:5432/infisical
       - REDIS_URL=redis://infra-redis:6379
       - ENCRYPTION_KEY=${INFISICAL_ENCRYPTION_KEY}
       - AUTH_SECRET=${INFISICAL_AUTH_SECRET}
@@ -67,7 +70,7 @@ services:
       - infra-storage
     ports:
       - "${PORT_MINIO_API}:9091"
-      - "${PORT_MINIO_CONSOLE}:9090"
+      - "${PORT_MINIO_UI}:9090"
     command: server --address ":9091" --console-address ":9090" /data
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}

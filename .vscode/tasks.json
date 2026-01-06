@@ -40,7 +40,7 @@
         {
             "label": "Infra: Total Reset (Compose Down + Cleanup)",
             "type": "shell",
-            "command": "docker compose down --remove-orphans && docker container prune -f && docker image prune -f && docker builder prune -af",
+            "command": "docker compose down --remove-orphans && docker container prune -f && docker image prune -f",
             "detail": "Stops infra, removes orphaned containers and dangling images. Leaves network intact.",
             "problemMatcher": [],
             "presentation": {

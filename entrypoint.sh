@@ -68,6 +68,7 @@ declare -A FLORENCE_SECRETS=(
     ["S3_ACCESS_KEY"]="$MINIO_ROOT_USER"
     ["S3_SECRET_KEY"]="$MINIO_ROOT_PASSWORD"
     ["S3_BUCKET"]="florence-uploads"
+    ["DATABASE_URL"]="postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${INFRA_SQL_SERVICE_NAME}:5432/florence_db"
 )
 
 declare -A OPEN_WEBUI_SECRETS=(
