@@ -1,0 +1,54 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Infra: Create Network (Safe)",
+            "type": "shell",
+            "command": "docker network inspect infra-storage >/dev/null 2>&1 || docker network create infra-storage",
+            "detail": "Checks if infra-storage exists; creates it only if missing.",
+            "problemMatcher": [],
+            "presentation": {
+                "clear": true,
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Infra: Delete Network",
+            "type": "shell",
+            "command": "docker network rm infra-storage",
+            "detail": "Forcefully removes the shared infra-storage network.",
+            "problemMatcher": [],
+            "presentation": {
+                "clear": true,
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Infra: Delete Volumne",
+            "type": "shell",
+            "command": "docker compose down -v",
+            "problemMatcher": [],
+            "detail": "Forcefully removes the volumes.",
+            "presentation": {
+                "clear": true,
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Infra: Total Reset (Compose Down + Cleanup)",
+            "type": "shell",
+            "command": "docker compose down --remove-orphans && docker container prune -f && docker image prune -f && docker builder prune -af",
+            "detail": "Stops infra, removes orphaned containers and dangling images. Leaves network intact.",
+            "problemMatcher": [],
+            "presentation": {
+                "clear": true,
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "dependsOn": []
+        }
+    ]
+}

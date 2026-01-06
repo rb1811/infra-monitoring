@@ -1,57 +1,102 @@
 version: '3.8'
 
 services:
-  # --- THE DATABASE (For Infisical) ---
-  infisical-db:
-    image: postgres:15-alpine
-    container_name: infisical-db
+  # --- THE DATABASE ---
+  infra-infisical-db:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM postgres:15-alpine
+    image: ${INFRA_SQL_DB_IMAGE_NAME}
+    container_name: ${INFRA_SQL_DB_CONTAINER_NAME}
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${infisicalpassword}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=infisical
     networks:
       - infra-storage
     volumes:
-      - ./infisical-db-data:/var/lib/postgresql/data
+      - infra-db-data:/var/lib/postgresql/data
 
-  # --- THE CACHE (For Infisical) ---
-  infisical-redis:
-    image: redis:7-alpine
-    container_name: infisical-redis
+
+  # --- THE CACHE ---
+  infra-redis:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM redis:7-alpine
+    image: ${INFRA_CACHE_IMAGE_NAME}
+    container_name: ${INFRA_CACHE_CONTAINER_NAME}
     networks:
       - infra-storage
+    volumes:
+      - infra-redis-data:/data
 
-  # --- INFISICAL (Your Azure Key Vault alternative) ---
-  infisical:
-    image: infisical/infisical:latest
-    container_name: infisical
+  # --- INFISICAL ---
+  infra-infisical:
+    image: ${INFRA_KEYVAULT_IMAGE_NAME}
+    container_name: ${INFRA_KEYVAULT_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM infisical/infisical:latest
     depends_on:
-      - infisical-db
-      - infisical-redis
+      - infra-infisical-db
+      - infra-redis
     ports:
-      - "9081:8080" # Access the UI here to set your passwords
+      - "${PORT_INFISICAL_UI}:8080"
     environment:
       - NODE_ENV=production
-      - DB_CONNECTION_URL=postgresql://{${POSTGRES_USER}}:${infisicalpassword}@infisical-db:5432/infisical
-      - REDIS_URL=redis://infisical-redis:6379
-      - ENCRYPTION_KEY=${INFISICAL_ENCRYPTION_KEY} # Generate once with: openssl rand -hex 32
-      - AUTH_SECRET=${INFISICAL_AUTH_SECRET}     # Generate once with: openssl rand -hex 32
-      - SITE_URL=http://localhost:9081
+      - DB_CONNECTION_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@infra-infisical-db:5432/infisical
+      - REDIS_URL=redis://infra-redis:6379
+      - ENCRYPTION_KEY=${INFISICAL_ENCRYPTION_KEY}
+      - AUTH_SECRET=${INFISICAL_AUTH_SECRET}
+      - SITE_URL=http://localhost:${PORT_INFISICAL_UI}
     networks:
       - infra-storage
 
-  # --- MINIO (Shared Storage) ---
-  minio:
-    image: quay.io/minio/minio:latest
-    container_name: minio
+  # --- MINIO ---
+  infra-minio:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM quay.io/minio/minio:latest
+    image: ${INFRA_BLOB_STORAGE_IMAGE_NAME}
+    container_name: ${INFRA_BLOB_STORAGE_CONTAINER_NAME}
     networks:
       - infra-storage
     ports:
-      - "9091:9091"
-      - "9090:9090"
+      - "${PORT_MINIO_API}:9091"
+      - "${PORT_MINIO_CONSOLE}:9090"
     command: server --address ":9091" --console-address ":9090" /data
-    # ... healthcheck and volumes as before ...
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - infra-minio-data:/data
+
+  # --- PROVISIONER ---
+  infra-provisioner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${INFRA_BLOB_STORAGE_IMAGE_PROVISIONER}
+    container_name: ${INFRA_BLOB_STORAGE_CONTAINER_PROVISIONER}
+    depends_on:
+      - infra-infisical
+      - infra-minio
+    env_file: .env
+    networks:
+      - infra-storage
 
 networks:
   infra-storage:
     external: true
+
+volumes:
+  infra-db-data:
+    name: infra-db-data
+  infra-redis-data:
+    name: infra-redis-data
+  infra-minio-data:
+    name: infra-minio-data
