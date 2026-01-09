@@ -75,6 +75,7 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MC_HOST_central=http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9091
     volumes:
       - infra-minio-data:/data
 
