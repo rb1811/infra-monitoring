@@ -4,7 +4,7 @@
         {
             "label": "Infra: Create Network (Safe)",
             "type": "shell",
-            "command": "docker network inspect infra-storage >/dev/null 2>&1 || docker network create infra-storage",
+            "command": "docker network inspect infra-storage >/dev/null 2>&1 || docker network create --driver bridge --subnet 172.25.0.0/24 infra-storage",
             "detail": "Checks if infra-storage exists; creates it only if missing.",
             "problemMatcher": [],
             "presentation": {

@@ -78,16 +78,18 @@ declare -A FLORENCE_SECRETS=(
 )
 
 declare -A OPEN_WEBUI_SECRETS=(
+    # Open WebUI officially looks for these exact keys:
     ["S3_ENDPOINT_URL"]="http://${INFRA_BLOB_STORAGE_SERVICE_NAME}:9091"
-    ["S3_ACCESS_KEY"]="$MINIO_ROOT_USER"
-    ["S3_SECRET_KEY"]="$MINIO_ROOT_PASSWORD"
-    ["S3_BUCKET"]="open-webui"
+    ["S3_ACCESS_KEY_ID"]="$MINIO_ROOT_USER"
+    ["S3_SECRET_ACCESS_KEY"]="$MINIO_ROOT_PASSWORD"
+    ["S3_BUCKET_NAME"]="open-webui"
+    ["STORAGE_PROVIDER"]="s3"
+    ["S3_REGION_NAME"]="us-east-1" # Often required by S3 libraries even for MinIO
 )
-
 # ---------------------------------------------------------
 # 5. PROVISIONING FUNCTION
 # ---------------------------------------------------------
-# This function creates folders in Infisical and populates them with secrets
+# This function creates folders in Infisical and populates them with secretsp
 provision_project() {
     local folder_name=$1   # e.g., "florence"
     local -n secrets_dict=$2 # Reference to the associative array (e.g., FLORENCE_SECRETS)
