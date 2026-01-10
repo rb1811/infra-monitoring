@@ -24,20 +24,25 @@ mc alias set central http://${INFRA_BLOB_STORAGE_SERVICE_NAME}:9091 "$MINIO_ROOT
 # Set Internal Field Separator to comma to parse the config string (e.g., "bucket1:7,bucket2:30")
 IFS=','
 for item in $MINIO_BUCKETS_CONFIG; do
-    # Extract bucket name (everything before the colon)
     BUCKET_NAME=${item%%:*}
-    # Extract expiry days (everything after the colon)
     EXPIRY_DAYS=${item#*:}
     
-    # Create the bucket (ignore error if it already exists)
     mc mb central/"$BUCKET_NAME" 2>/dev/null || echo "Bucket $BUCKET_NAME exists."
     
-    # Reset existing lifecycle rules to avoid duplicates/conflicts
+    # Reset existing lifecycle rules to avoid duplicates
     mc ilm rule rm --all --force central/"$BUCKET_NAME" 2>/dev/null || true
     
-    # Add a new rule: automatically delete files after X days
+    # RULE 1: Standard Expiry for files
     echo "Setting $EXPIRY_DAYS day retention for $BUCKET_NAME"
     mc ilm rule add --expiry-days "$EXPIRY_DAYS" central/"$BUCKET_NAME"
+    
+    # RULE 2: THE FIX - Expired Object Delete Markers cleanup
+    # This removes the "ghost" tombstones that keep prefixes alive in the UI
+    echo "Enabling Delete Marker cleanup for $BUCKET_NAME"
+    mc ilm rule add --expire-delete-marker central/"$BUCKET_NAME"
+
+    # OPTIONAL: Clear out non-current versions if versioning was ever accidentally enabled
+    mc ilm rule add --noncurrent-expire-days "$EXPIRY_DAYS" central/"$BUCKET_NAME"
 done
 
 # ---------------------------------------------------------
