@@ -1,2 +1,5 @@
 backup_infra*
 .env
+.vscode/settings.json
+.vscode/github-accounts.json
+.vscode/.gitignore

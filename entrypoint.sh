@@ -86,6 +86,19 @@ declare -A OPEN_WEBUI_SECRETS=(
     ["STORAGE_PROVIDER"]="s3"
     ["S3_REGION_NAME"]="us-east-1" # Often required by S3 libraries even for MinIO
 )
+
+
+declare -A AI_CCTV_SECRETS=(
+    ["DB_USER"]="${AI_CCTV_POSTGRES_USER}"
+    ["DB_PASSWORD"]="${AI_CCTV_POSTGRES_PASSWORD}"
+    ["DB_NAME"]="${AI_CCTV_POSTGRES_DB}"
+    ["LOGFIRE_TOKEN"]="${AI_CCTV_LOGFIRE_TOKEN}"
+    ["NVR_IP"]="${AI_CCTV_NVR_IP}"
+    ["NVR_USER"]="${AI_CCTV_NVR_USER}"
+    ["NVR_PASSWORD"]="${AI_CCTV_NVR_PASS}"
+)
+
+
 # ---------------------------------------------------------
 # 5. PROVISIONING FUNCTION
 # ---------------------------------------------------------
@@ -135,6 +148,7 @@ provision_project() {
 # Run the provisioning for each defined project
 provision_project "florence" FLORENCE_SECRETS
 provision_project "open-webui" OPEN_WEBUI_SECRETS
+provision_project "ai-cctv" AI_CCTV_SECRETS
 
 echo "✅ All projects provisioned successfully!"
 echo "✅ Infra Provisioning Complete!"
