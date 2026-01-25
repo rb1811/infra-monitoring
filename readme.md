@@ -11,7 +11,7 @@ This repository manages the foundational infrastructure required for the Florenc
 
 ## 🔑 Phase 1: Internal Encryption Keys (OpenSSL)
 
-Before you can start Infisical, you must generate two internal encryption keys. These are **NOT** the same as the Client IDs you get from the UI. These keys allow Infisical to encrypt its own database and authenticate users.
+Before you can start Infisical, you must generate two internal encryption keys and one logfire token. These are **NOT** the same as the Client IDs you get from the UI. These keys allow Infisical to encrypt its own database and authenticate users.
 
 ### Why are these needed?
 Without these, Infisical cannot encrypt the secrets you save in its dashboard. These are low-level "Master Keys."
@@ -27,6 +27,8 @@ Run these commands in your terminal and paste the output into your `.env` file:
     ```
     openssl rand -hex 32
     ```
+### 📉 Logfire 
+For structured logging and monitoring. Create a free [Logfire](https://pydantic.dev/logfire) account and select the free plan. The [free plan](https://pydantic.dev/pricing) is very generous for localhost project. They give 10M span AKA logs. If you have ever used Grafana or Humio, you will find almost all the developer needful features in here. Create a project in Logfire and create a **write** token. Copy the token and put it in `.env`
 
 ## ⚙️ Configuration (.env)
 Create a `.env` file in the root directory.
@@ -57,6 +59,9 @@ INFISICAL_MACHINE_SECRET=
 PORT_INFISICAL_UI=9080
 PORT_MINIO_API=9091
 PORT_MINIO_UI=9090
+
+# --- LOGFIRE TOKEN from Logfire account ---
+LOGFIRE_TOKEN=
 
 # --- INFRA NAMES ----
 INFRA_SQL_SERVICE_NAME=infra-postgres
