@@ -90,6 +90,10 @@ declare -A OPEN_WEBUI_SECRETS=(
 
 
 declare -A AI_CCTV_SECRETS=(
+    ["S3_ENDPOINT_URL"]="http://infra-minio:9091"
+    ["S3_ACCESS_KEY"]="$MINIO_ROOT_USER"
+    ["S3_SECRET_KEY"]="$MINIO_ROOT_PASSWORD"
+    ["S3_BUCKET_NAME"]="ai-cctv"
     ["DB_USER"]="${AI_CCTV_POSTGRES_USER}"
     ["DB_PASSWORD"]="${AI_CCTV_POSTGRES_PASSWORD}"
     ["DB_NAME"]="${AI_CCTV_POSTGRES_DB}"
