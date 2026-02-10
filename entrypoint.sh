@@ -101,6 +101,12 @@ declare -A AI_CCTV_SECRETS=(
     ["NVR_IP"]="${AI_CCTV_NVR_IP}"
     ["NVR_USER"]="${AI_CCTV_NVR_USER}"
     ["NVR_PASSWORD"]="${AI_CCTV_NVR_PASS}"
+    ["OLLAMA_BASE_URL"]="http://host.docker.internal:11434"
+    ["OLLAMA_MODEL"]="qwen2.5-coder:7b-instruct"
+    ["GEMINI_MODEL"]="gemini-2.5-flash-lite"
+    ["GEMINI_API_KEY"]="${AI_CCTV_GEMINI_API_KEY}"
+    ["NTFY_TOPIC"]="ai-cctv"
+    ["NTFY_BASE_URL"]="http://192.168.1.210:1811"
 )
 
 
