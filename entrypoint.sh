@@ -32,6 +32,10 @@ for item in $MINIO_BUCKETS_CONFIG; do
     # Reset existing lifecycle rules to avoid duplicates
     mc ilm rule rm --all --force central/"$BUCKET_NAME" 2>/dev/null || true
     
+    # --- ADD THIS LINE TO MAKE BUCKET PUBLIC (Read-Only) ---
+    echo "Setting public read-only access for $BUCKET_NAME"
+    mc anonymous set download central/"$BUCKET_NAME"
+
     # RULE 1: Standard Expiry for files
     echo "Setting $EXPIRY_DAYS day retention for $BUCKET_NAME"
     mc ilm rule add --expiry-days "$EXPIRY_DAYS" central/"$BUCKET_NAME"
@@ -90,7 +94,8 @@ declare -A OPEN_WEBUI_SECRETS=(
 
 
 declare -A AI_CCTV_SECRETS=(
-    ["S3_ENDPOINT_URL"]="http://infra-minio:9091"
+    ["S3_ENDPOINT_URL"]="http://${INFRA_BLOB_STORAGE_SERVICE_NAME}:9091"
+    ["S3_PUBLIC_URL"]="http://localhost:9091"
     ["S3_ACCESS_KEY"]="$MINIO_ROOT_USER"
     ["S3_SECRET_KEY"]="$MINIO_ROOT_PASSWORD"
     ["S3_BUCKET_NAME"]="ai-cctv"
@@ -110,6 +115,7 @@ declare -A AI_CCTV_SECRETS=(
     ["GEMINI_API_KEY"]="${AI_CCTV_GEMINI_API_KEY}"
     ["NTFY_TOPIC"]="ai-cctv"
     ["NTFY_BASE_URL"]="http://192.168.1.210:1811"
+    ["QUERY_RUN_DAYS_TO_KEEP"]=3
 )
 
 
