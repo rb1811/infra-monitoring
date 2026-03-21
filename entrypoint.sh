@@ -80,6 +80,7 @@ declare -A FLORENCE_SECRETS=(
     ["S3_BUCKET"]="florence-uploads"
     ["DATABASE_URL"]="postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${INFRA_SQL_SERVICE_NAME}:5432/florence_db"
     ["LOGFIRE_TOKEN"]="$LOGFIRE_TOKEN"
+    ["REDIS_HOST"]="redis://${INFRA_CACHE_SERVICE_NAME}:6379"
 )
 
 declare -A OPEN_WEBUI_SECRETS=(
