@@ -31,7 +31,7 @@ Run these commands in your terminal and paste the output into your `.env` file:
 For structured logging and monitoring. Create a free [Logfire](https://pydantic.dev/logfire) account and select the free plan. The [free plan](https://pydantic.dev/pricing) is very generous for localhost project. They give 10M span AKA logs. If you have ever used Grafana or Humio, you will find almost all the developer needful features in here. Create a project in Logfire and create a **write** token. Copy the token and put it in `.env`
 
 ## ⚙️ Configuration (.env)
-Create a `.env` file in the root directory.
+Create a `.env` file in the root directory. Change the credentials as per your liking before running the script
 
 Note: Your first run will partially fail (this is expected). Fill in the OpenSSL keys first, then follow the "First Run" steps below to get the Machine Identity keys.
 
@@ -43,8 +43,23 @@ MINIO_BUCKETS_CONFIG="florence-uploads:1,open-webui:1"
 # --- MINIO & DB CREDENTIALS ---
 MINIO_ROOT_USER=admin
 MINIO_ROOT_PASSWORD=password123
+
+# --- INFRA POSTGRESS ---
+
 POSTGRES_USER=infisical
 POSTGRES_PASSWORD=infisicalpassword
+
+
+# --- INFISICAL SERVICE CREDENTIALS ---
+INFISICAL_DB=infisical
+INFISICAL_USER=infisical
+INFISICAL_PASS=infisicalpassword
+
+# --- FLORENCE SERVICE CREDENTIALS ---
+FLORENCE_DB=florence_db
+FLORENCE_USER=infisical
+FLORENCE_PASS=infisicalpassword
+
 
 # --- INFISICAL INTERNAL SETUP (Generated via OpenSSL) ---
 INFISICAL_ENCRYPTION_KEY=your_16_hex_key
@@ -93,6 +108,12 @@ AI_CCTV_NVR_IP=
 AI_CCTV_NVR_PORT=
 AI_CCTV_NVR_USER=
 AI_CCTV_NVR_PASS=
+
+
+# --- THE MASTER LIST FOR THE SCRIPT ---
+# Format: db:user:pass,db:user:pass
+# Ensure its present in the .env file at the bottom of the file, for init-db-wrapper script to work
+POSTGRES_PROVISION_LIST="${INFISICAL_DB}:${INFISICAL_USER}:${INFISICAL_PASS},${FLORENCE_DB}:${FLORENCE_USER}:${FLORENCE_PASS}"
 
 ```
 ## 🚀 First Run & Initial Setup
