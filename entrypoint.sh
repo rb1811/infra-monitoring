@@ -109,14 +109,13 @@ declare -A AI_CCTV_SECRETS=(
     ["NVR_USER"]="${AI_CCTV_NVR_USER}"
     ["NVR_PASSWORD"]="${AI_CCTV_NVR_PASS}"
     ["OLLAMA_BASE_URL"]="http://host.docker.internal:11434"
-    ["OLLAMA_MODEL"]="phi4-mini:latest"
-    ["OLLAMA_NUM_GPU"]=999
-    #["OLLAMA_MODEL"]="qwen2.5-coder:7b-instruct"
+    ["OLLAMA_MODEL"]="qwen2.5:3b-instruct-q5_1"
     ["GEMINI_MODEL"]="gemini-2.5-flash-lite"
     ["GEMINI_API_KEY"]="${AI_CCTV_GEMINI_API_KEY}"
     ["NTFY_TOPIC"]="ai-cctv"
     ["NTFY_BASE_URL"]="http://192.168.1.210:1811"
     ["QUERY_RUN_DAYS_TO_KEEP"]=3
+    ["REDIS_HOST"]="redis://${INFRA_CACHE_SERVICE_NAME}:6379"
 )
 
 
