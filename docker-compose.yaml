@@ -36,7 +36,11 @@ services:
       - infra-storage
     volumes:
       - infra-redis-data:/data
-    command: redis-server --maxmemory 400mb --maxmemory-policy allkeys-lru --save ""
+    command: >
+      redis-server 
+      --appendonly yes 
+      --maxmemory 400mb 
+      --maxmemory-policy volatile-lru
     deploy:
       resources:
         limits:
