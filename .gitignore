@@ -3,3 +3,4 @@ backup_infra*
 .vscode/settings.json
 .vscode/github-accounts.json
 .vscode/.gitignore
+full_backup.sql
