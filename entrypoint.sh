@@ -88,6 +88,22 @@ declare -A OPEN_WEBUI_SECRETS=(
     ["STORAGE_PROVIDER"]="s3"
     ["S3_REGION_NAME"]="us-east-1" # Often required by S3 libraries even for MinIO
 )
+
+
+declare -A FIREFLY_SECRETS=(
+    ["DB_USERNAME"]="${FIREFLY_USER}"
+    ["DB_PASSWORD"]="${FIREFLY_PASS}"
+    ["DB_DATABASE"]="${FIREFLY_DB}"
+    ["DB_HOST"]="${INFRA_SQL_SERVICE_NAME}"
+    ["DB_PORT"]="5432"
+    ["DB_CONNECTION"]="pgsql"
+    ["SITE_OWNER"]="${FIREFLY_SITE_USER}"
+    ["APP_KEY"]="${FIREFLY_APP_KEY}"         # <--- Ensure this is 32 chars
+    ["APP_URL"]="http://localhost:8111"      # <--- Added
+    ["TRUSTED_PROXIES"]="**"                # <--- Added
+    ["APP_ENV"]="production"                 # <--- Added
+)
+
 # ---------------------------------------------------------
 # 5. PROVISIONING FUNCTION
 # ---------------------------------------------------------
@@ -137,6 +153,7 @@ provision_project() {
 # Run the provisioning for each defined project
 provision_project "florence" FLORENCE_SECRETS
 provision_project "open-webui" OPEN_WEBUI_SECRETS
+provision_project "finance-tracker" FIREFLY_SECRETS
 
 echo "✅ All projects provisioned successfully!"
 echo "✅ Infra Provisioning Complete!"
