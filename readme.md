@@ -23,10 +23,14 @@ Run these commands in your terminal and paste the output into your `.env` file:
    ```
    openssl rand -hex 16
    ```
+   For INFISICAL_ENCRYPTION_KEY
+
 2. **Auth Secret** (Used to sign authentication tokens):
     ```
     openssl rand -hex 32
     ```
+    For INFISICAL_AUTH_SECRET
+
 ### 📉 Logfire 
 For structured logging and monitoring. Create a free [Logfire](https://pydantic.dev/logfire) account and select the free plan. The [free plan](https://pydantic.dev/pricing) is very generous for localhost project. They give 10M span AKA logs. If you have ever used Grafana or Humio, you will find almost all the developer needful features in here. Create a project in Logfire and create a **write** token. Copy the token and put it in `.env`
 
@@ -122,7 +126,7 @@ When you run `docker compose up` for the first time, the `infra-minio-provisione
 
 **Step-by-Step Infisical Setup:**
 
-1. Create `infra-storage` docker network. This entire project works in isolated docker network. The other projects like [FastAPI Wrapper for Florence Project](https://github.com/rb1811/FastAPI-Wrapper-for-MS-Florence?tab=readme-ov-file) depends aka communicated with the services running in this network. For this you have 2 options.
+2. Create `infra-storage` docker network. This entire project works in isolated docker network. The other projects like [FastAPI Wrapper for Florence Project](https://github.com/rb1811/FastAPI-Wrapper-for-MS-Florence?tab=readme-ov-file) depends aka communicated with the services running in this network. For this you have 2 options.
 
     a. **Via CLI**
     ```
@@ -132,22 +136,22 @@ When you run `docker compose up` for the first time, the `infra-minio-provisione
 
     Note: the type of network is `external` check [Docker-compose.yaml](./docker-compose.yaml), 
 
-2. Launch the UI: Go to http://localhost:9080 and create your initial admin account.
+3. Launch the UI: Go to http://localhost:9080 and create your initial admin account.
 
-3. Create a Project:
+4. Create a Project:
 
     a. Create a new project (e.g., "Florence-AI").
 
     b. Go to **Project Settings** and copy the `Project ID`. Paste this into your `.env` in `INFISICAL_PROJECT_ID`
 
-4. Create Machine Identity:
+5. Create Machine Identity:
     a. Navigate to **Access Control > Machine Identities**.
 
     b. Click **Create Machine** (Name it "Florence-App").
 
     c. **Role**: Assign the Admin role to this machine so it can read secrets.
 
-5. Generate Credentials:
+6. Generate Credentials:
 
     a. Copy the **Machine ID** (Client ID) to your `.env` in `INFISICAL_MACHINE_ID`
 
@@ -155,7 +159,7 @@ When you run `docker compose up` for the first time, the `infra-minio-provisione
 
     c. ⚠️ IMPORTANT: Copy the Secret immediately; you will never see it again. Paste it into `INFISICAL_MACHINE_SECRET` in your `.env`.
 
-6. Restart  **Via CLI**: 
+7. Restart  **Via CLI**: 
     ```
     docker compose down && docker compose up -d
     ``` 
