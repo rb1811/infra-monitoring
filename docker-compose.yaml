@@ -107,6 +107,24 @@ services:
     networks:
       - infra-storage
 
+  infra-finance-tracker:
+    build:
+      context: .
+      dockerfile_inline: FROM fireflyiii/core:latest
+    container_name: ${FIN_CONTAINER_NAME}-firefly
+    image: ${FIN_IMAGE_NAME}-firefly
+    ports:
+      - "${FIREFLY_PORT}:8080"
+    env_file:
+      - .env
+    networks:
+      - infra-storage
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
 networks:
   infra-storage:
     external: true
