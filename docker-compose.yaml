@@ -124,6 +124,10 @@ services:
       resources:
         limits:
           memory: 512M
+    volumes:
+      - infra-firefly-data:/var/www/html/storage
+      - infra-firefly-data:/var/www/html/export
+      - infra-firefly-data:/var/www/html/storage/upload
 
 networks:
   infra-storage:
@@ -136,3 +140,5 @@ volumes:
     name: infra-redis-data
   infra-minio-data:
     name: infra-minio-data
+  infra-firefly-data:
+    name: infra-firefly-data
