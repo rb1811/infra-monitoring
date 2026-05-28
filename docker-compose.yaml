@@ -42,6 +42,25 @@ services:
       - tools-firefly-data:/var/www/html/storage
       - tools-firefly-data:/var/www/html/export
       - tools-firefly-data:/var/www/html/storage/upload
+
+  
+  tools-omnitool:
+    build:
+      context: .
+      dockerfile_inline: FROM iib0011/omni-tools
+    container_name: tools-omnitool
+    image: tools-omnitool
+    ports:
+      - "${OMNITOOL_PORT}:80"
+    networks:
+      - tools-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: unless-stopped
+
+
   
   # --- PDF UTILITY ---
   tools-bentopdf:
