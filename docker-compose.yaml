@@ -42,6 +42,24 @@ services:
       - tools-firefly-data:/var/www/html/storage
       - tools-firefly-data:/var/www/html/export
       - tools-firefly-data:/var/www/html/storage/upload
+  
+  # --- PDF UTILITY ---
+  tools-bentopdf:
+    build:
+      context: .
+      dockerfile_inline: FROM bentopdf/bentopdf:latest
+    container_name: tools-bentopdf
+    image: tools-bentopdf
+    ports:
+      - "${BENTOPDF_PORT}:8080"
+    networks:
+      - tools-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: unless-stopped
+
 
 networks:
   tools-network:
