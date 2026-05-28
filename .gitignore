@@ -1,4 +1,4 @@
 backup_infra*
 .env
 .vscode/settings.json
-full_backup.sql
+firefly_backup.sql
