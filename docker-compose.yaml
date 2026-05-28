@@ -1,122 +1,58 @@
-version: '3.8'
-
 services:
   # --- THE DATABASE ---
-  infra-postgres:
-      build:
-        context: .
-        dockerfile: Dockerfile_infra_postgres
-      image: ${INFRA_SQL_DB_IMAGE_NAME}
-      container_name: ${INFRA_SQL_DB_CONTAINER_NAME}
-      # OVERRIDE THE ENTRYPOINT
-      entrypoint: ["init-db-wrapper.sh"]
-      environment:
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_PROVISION_LIST=${POSTGRES_PROVISION_LIST}
-      networks:
-        - infra-storage
-      volumes:
-        - infra-db-data:/var/lib/postgresql/data
-      deploy:
-        resources:
-          limits:
-            memory: 512M
-
-
-  # --- THE CACHE ---
-  infra-redis:
+  tools-firefly-db:
     build:
       context: .
-      dockerfile_inline: |
-        FROM redis:7-alpine
-    image: ${INFRA_CACHE_IMAGE_NAME}
-    container_name: ${INFRA_CACHE_CONTAINER_NAME}
+      dockerfile_inline: FROM postgres:15-alpine
+    image: ${FIN_DB_SERVICE_NAME}
+    container_name: ${FIN_DB_SERVICE_NAME}
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     networks:
-      - infra-storage
+      - tools-network
     volumes:
-      - infra-redis-data:/data
-    command: >
-      redis-server 
-      --appendonly yes 
-      --maxmemory 400mb 
-      --maxmemory-policy volatile-lru
+      - tools-firefly-db-data:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
           memory: 512M
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    restart: unless-stopped
 
-  # --- INFISICAL ---
-  infra-infisical:
-    image: ${INFRA_KEYVAULT_IMAGE_NAME}
-    container_name: ${INFRA_KEYVAULT_CONTAINER_NAME}
+  # --- FINANCE TRACKER ---
+  tools-firefly:
     build:
       context: .
-      dockerfile_inline: |
-        FROM infisical/infisical:latest
-    depends_on:
-      - infra-postgres
-      - infra-redis
+      dockerfile_inline: FROM fireflyiii/core:latest
+    container_name: ${FIN_SERVICE_NAME}
+    image: ${FIN_SERVICE_NAME}
     ports:
-      - "${PORT_INFISICAL_UI}:8080"
-    environment:
-      - NODE_ENV=production
-      - DB_CONNECTION_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${INFRA_SQL_SERVICE_NAME}:5432/infisical
-      - REDIS_URL=redis://infra-redis:6379
-      - ENCRYPTION_KEY=${INFISICAL_ENCRYPTION_KEY}
-      - AUTH_SECRET=${INFISICAL_AUTH_SECRET}
-      - SITE_URL=http://localhost:${PORT_INFISICAL_UI}
+      - "${FIREFLY_PORT}:8080"
+    env_file:
+      - .env
     networks:
-      - infra-storage
-
-  # --- MINIO ---
-  infra-minio:
-    build:
-      context: .
-      dockerfile_inline: |
-        FROM quay.io/minio/minio:latest
-    image: ${INFRA_BLOB_STORAGE_IMAGE_NAME}
-    container_name: ${INFRA_BLOB_STORAGE_CONTAINER_NAME}
-    networks:
-      - infra-storage
-    ports:
-      - "${PORT_MINIO_API}:9091"
-      - "${PORT_MINIO_UI}:9090"
-    command: server --address ":9091" --console-address ":9090" /data
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MC_HOST_central=http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@localhost:9091
+      - tools-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     volumes:
-      - infra-minio-data:/data
-
-  # --- PROVISIONER ---
-  infra-provisioner:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ${INFRA_BLOB_STORAGE_IMAGE_PROVISIONER}
-    container_name: ${INFRA_BLOB_STORAGE_CONTAINER_PROVISIONER}
-    depends_on:
-      - infra-infisical
-      - infra-minio
-    env_file: .env
-    networks:
-      - infra-storage
+      - tools-firefly-data:/var/www/html/storage
+      - tools-firefly-data:/var/www/html/export
+      - tools-firefly-data:/var/www/html/storage/upload
 
 networks:
-  infra-storage:
-    external: true
+  tools-network:
+    name: tools-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.5.0.0/24
 
 volumes:
-  infra-db-data:
-    name: infra-db-data
-  infra-redis-data:
-    name: infra-redis-data
-  infra-minio-data:
-    name: infra-minio-data
+  tools-firefly-db-data:
+    name: tools-firefly-db-data
+  tools-firefly-data:
+    name: tools-firefly-data
