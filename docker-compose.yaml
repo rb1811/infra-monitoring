@@ -12,6 +12,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     networks:
       - tools-network
+    ports:
+      - "${TOOLS_FIREFLY_DB_PORT}:5432"
     volumes:
       - tools-firefly-db-data:/var/lib/postgresql/data
     deploy:
@@ -78,6 +80,34 @@ services:
         limits:
           memory: 256M
     restart: unless-stopped
+  
+  # --- NETWORK DNS & AD BLOCKER ---
+  tools-pihole:
+    build:
+        context: .
+        dockerfile_inline: FROM pihole/pihole:latest
+    image: tools-pihole
+    container_name: tools-pihole
+    env_file: .env
+    ports:
+      # Binds strictly to your PC's LAN IP so only the network can see it
+      - "${HOST_IP_ADDRESS}:53:53/tcp"  
+      - "${HOST_IP_ADDRESS}:53:53/udp"
+      - "${PIHOLE_WEB_PORT:-8089}:80/tcp"
+    environment:
+      - TZ=Asia/Kolkata
+      - FTLCONF_webserver_api_password=${PIHOLE_PASSWORD:-admin}
+      - FTLCONF_dns_listeningMode=all
+    volumes:
+      - tools-pihole-config:/etc/pihole
+      - tools-pihole-dns:/etc/dnsmasq.d
+    networks:
+      - tools-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
 
 networks:
@@ -93,3 +123,7 @@ volumes:
     name: tools-firefly-db-data
   tools-firefly-data:
     name: tools-firefly-data
+  tools-pihole-config:
+    name: tools-pihole-config
+  tools-pihole-dns:
+    name: tools-pihole-dns
