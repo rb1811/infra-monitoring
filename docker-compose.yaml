@@ -108,6 +108,30 @@ services:
       resources:
         limits:
           memory: 256M
+  
+
+  # --- MONITORING ---
+  tools-glances:
+    build:
+        context: .
+        dockerfile_inline: FROM nicolargo/glances:latest
+    image: tools-glances
+    container_name: tools-glances
+    pid: host
+    privileged: true
+    ports:
+      - "${GLANCES_PORT:-61220}:61220"
+    environment:
+      - GLANCES_OPT=-w -p 61220 -t 3 --enable-plugin sensors,network,docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - tools-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
 
 networks:
