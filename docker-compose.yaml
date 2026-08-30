@@ -132,6 +132,27 @@ services:
       resources:
         limits:
           memory: 256M
+  
+  # --- ADVANCED PDF UTILITY (Stirling PDF) ---
+  tools-stirling-pdf:
+    build:
+        context: .
+        dockerfile_inline: FROM docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest
+    image: tools-stirling-pdf
+    container_name: tools-stirling-pdf
+    ports:
+      - "${STIRLING_PDF_PORT:-8082}:8080"
+    environment:
+      - DOCKER_ENABLE_SECURITY=false
+    volumes:
+      - tools-stirling-configs:/configs
+    networks:
+      - tools-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    restart: unless-stopped
 
 
 networks:
@@ -151,3 +172,5 @@ volumes:
     name: tools-pihole-config
   tools-pihole-dns:
     name: tools-pihole-dns
+  tools-stirling-configs:
+    name: tools-stirling-configs
